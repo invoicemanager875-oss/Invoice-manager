@@ -32,6 +32,7 @@ class Brand extends Model
         'ttd_jabatan',
         'color_header',
         'color_accent',
+        'default_desain_tema',
         'canva_link',
     ];
 

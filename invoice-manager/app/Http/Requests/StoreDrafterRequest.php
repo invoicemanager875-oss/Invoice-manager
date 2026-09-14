@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class StoreDrafterRequest extends FormRequest
@@ -19,6 +20,7 @@ class StoreDrafterRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'jobdesk' => ['nullable', Rule::in(User::JOBDESKS)],
             'brand_ids' => ['nullable', 'array'],
             'brand_ids.*' => ['exists:brands,id'],
         ];

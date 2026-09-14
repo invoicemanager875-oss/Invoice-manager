@@ -65,7 +65,7 @@
         imgUid: 0,
         addImageSlot() {
             this.imgUid++;
-            this.images.push({ _uid: 'new' + this.imgUid, caption: '' });
+            this.images.push({ _uid: 'new' + this.imgUid, caption: '', size: 'sedang' });
         },
         removeImageSlot(uid) {
             this.images = this.images.filter(im => im._uid !== uid);
@@ -105,6 +105,13 @@
             <x-text-input id="tanggal_order" name="tanggal_order" type="date" class="mt-1 block w-full"
                 value="{{ old('tanggal_order', isset($formOrder) ? $formOrder->tanggal_order->format('Y-m-d') : now()->format('Y-m-d')) }}" required />
             <x-input-error :messages="$errors->get('tanggal_order')" class="mt-1" />
+        </div>
+
+        <div>
+            <x-input-label for="deadline" value="Deadline (opsional)" />
+            <x-text-input id="deadline" name="deadline" type="date" class="mt-1 block w-full"
+                value="{{ old('deadline', optional($formOrder->deadline ?? null)->format('Y-m-d')) }}" />
+            <x-input-error :messages="$errors->get('deadline')" class="mt-1" />
         </div>
 
         <div>
@@ -246,13 +253,20 @@
             <h3 class="text-sm font-semibold text-slate-700 mb-3">Lampiran Gambar Tersimpan</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 @foreach ($existingImages as $img)
-                    <div class="border border-slate-200 rounded-lg p-3 flex gap-3">
-                        <img src="{{ \Illuminate\Support\Facades\Storage::url($img->path) }}" class="h-20 w-20 object-cover rounded border border-slate-200">
-                        <div class="flex-1">
-                            <input type="text" name="existing_images[{{ $img->id }}][caption]" value="{{ old('existing_images.'.$img->id.'.caption', $img->caption) }}"
-                                placeholder="Keterangan gambar..."
-                                class="w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mb-2">
-                            <label class="flex items-center gap-2 text-xs text-red-600">
+                    <div class="border border-slate-200 rounded-lg p-3">
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($img->path) }}"
+                            class="w-full h-56 object-contain rounded border border-slate-200 bg-slate-50 mb-3">
+                        <input type="text" name="existing_images[{{ $img->id }}][caption]" value="{{ old('existing_images.'.$img->id.'.caption', $img->caption) }}"
+                            placeholder="Keterangan gambar..."
+                            class="w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mb-2">
+                        <div class="flex items-center justify-between gap-3">
+                            <select name="existing_images[{{ $img->id }}][size]"
+                                class="text-xs border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                @foreach (\App\Models\FormOrderImage::SIZES as $key => $sizeInfo)
+                                    <option value="{{ $key }}" @selected(old('existing_images.'.$img->id.'.size', $img->size ?? 'sedang') === $key)>{{ $sizeInfo['label'] }}</option>
+                                @endforeach
+                            </select>
+                            <label class="flex items-center gap-2 text-xs text-red-600 shrink-0">
                                 <input type="checkbox" name="remove_image_ids[]" value="{{ $img->id }}">
                                 Hapus gambar ini
                             </label>
@@ -275,18 +289,20 @@
 
         <div class="space-y-3">
             <template x-for="(img, index) in images" :key="img._uid">
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-slate-50 rounded-lg p-3">
-                    <div class="sm:col-span-5">
-                        <input type="file" accept="image/*" :name="'images[' + index + '][file]'"
-                            class="block w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-navy-50 file:text-navy-600">
-                    </div>
-                    <div class="sm:col-span-6">
-                        <input type="text" :name="'images[' + index + '][caption]'" x-model="img.caption"
-                            placeholder="Keterangan gambar..."
-                            class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                    </div>
-                    <div class="sm:col-span-1 flex justify-end">
-                        <button type="button" @click="removeImageSlot(img._uid)" class="text-red-500 hover:text-red-700 text-sm">&times;</button>
+                <div class="bg-slate-50 rounded-lg p-3 space-y-2">
+                    <input type="file" accept="image/*" :name="'images[' + index + '][file]'"
+                        class="block w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-navy-50 file:text-navy-600">
+                    <input type="text" :name="'images[' + index + '][caption]'" x-model="img.caption"
+                        placeholder="Keterangan gambar..."
+                        class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                    <div class="flex items-center justify-between gap-3">
+                        <select :name="'images[' + index + '][size]'" x-model="img.size"
+                            class="text-xs border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            @foreach (\App\Models\FormOrderImage::SIZES as $key => $sizeInfo)
+                                <option value="{{ $key }}">{{ $sizeInfo['label'] }}</option>
+                            @endforeach
+                        </select>
+                        <button type="button" @click="removeImageSlot(img._uid)" class="text-red-500 hover:text-red-700 text-sm font-medium shrink-0">Hapus</button>
                     </div>
                 </div>
             </template>

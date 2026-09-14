@@ -21,6 +21,8 @@ class StoreFormOrderRequest extends FormRequest
 
             'tanggal_order' => ['required', 'date'],
 
+            'deadline' => ['nullable', 'date'],
+
             'nama_klien' => ['required', 'string', 'max:255'],
 
             'lokasi_project' => ['nullable', 'string'],
@@ -48,6 +50,8 @@ class StoreFormOrderRequest extends FormRequest
             'images.*.file' => ['nullable', 'image', 'max:5120'],
 
             'images.*.caption' => ['nullable', 'string', 'max:255'],
+
+            'images.*.size' => ['nullable', 'string', 'in:kecil,sedang,besar'],
 
             'revisions' => ['nullable', 'array'],
 

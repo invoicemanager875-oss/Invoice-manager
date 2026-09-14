@@ -10,6 +10,10 @@
         'brand' => 'Per Brand',
         'leads' => 'Leads',
     ];
+
+    if (config('features.drafter_tasks')) {
+        $tabs['kpi'] = 'KPI Drafter';
+    }
     $navy = '#1a365d';
     $gold = '#c9a227';
     $slate300 = '#cbd5e1';
@@ -31,9 +35,18 @@
         @endforeach
     </div>
 
-    @if (in_array($tab, ['bulanan', 'leads']))
-        <form method="GET" class="mb-6 flex items-center gap-2">
+    @if (in_array($tab, ['bulanan', 'leads', 'kpi']))
+        <form method="GET" class="mb-6 flex items-center gap-2 flex-wrap">
             <input type="hidden" name="tab" value="{{ $tab }}">
+            @if ($tab === 'kpi')
+                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Bulan</label>
+                <select name="month" onchange="this.form.submit()"
+                        class="text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                    @foreach ($months as $i => $m)
+                        <option value="{{ $i + 1 }}" @selected(($i + 1) == $month)>{{ $m }}</option>
+                    @endforeach
+                </select>
+            @endif
             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Tahun</label>
             <select name="year" onchange="this.form.submit()"
                     class="text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
@@ -291,6 +304,48 @@
                             <td class="py-1 text-right">{{ $data['leadsMonthlyTrend'][$i] }}</td>
                         </tr>
                     @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
+
+    @if ($tab === 'kpi')
+        <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-navy-600">KPI Drafter &mdash; {{ $months[$month - 1] }} {{ $year }}</h3>
+                <a href="{{ route('reports.kpi.pdf', ['year' => $year, 'month' => $month]) }}" target="_blank"
+                   class="inline-flex items-center gap-2 bg-navy-600 hover:bg-navy-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">
+                    <x-icon name="document-list" class="w-4 h-4" />
+                    Cetak PDF
+                </a>
+            </div>
+
+            <table class="w-full text-xs">
+                <thead>
+                    <tr class="text-slate-400">
+                        <th class="text-left py-2">Drafter</th>
+                        <th class="text-right py-2">Total Selesai</th>
+                        <th class="text-right py-2">Tepat Waktu</th>
+                        <th class="text-right py-2">Terlambat</th>
+                        <th class="text-right py-2">Tanpa Deadline</th>
+                        <th class="text-right py-2">% Tepat Waktu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($data['drafterKpi'] as $row)
+                        <tr class="border-t border-slate-100">
+                            <td class="py-2 font-semibold text-slate-700">{{ $row['drafter']->name ?? '-' }}</td>
+                            <td class="py-2 text-right">{{ $row['total_selesai'] }}</td>
+                            <td class="py-2 text-right text-emerald-600">{{ $row['tepat_waktu'] }}</td>
+                            <td class="py-2 text-right text-red-600">{{ $row['terlambat'] }}</td>
+                            <td class="py-2 text-right text-slate-400">{{ $row['tanpa_deadline'] }}</td>
+                            <td class="py-2 text-right font-semibold">
+                                {{ $row['persen_tepat_waktu'] !== null ? $row['persen_tepat_waktu'].'%' : '-' }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="py-6 text-center text-slate-400">Belum ada tugas selesai pada bulan ini.</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

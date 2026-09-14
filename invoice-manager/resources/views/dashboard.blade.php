@@ -22,24 +22,44 @@
     <div class="space-y-6">
 
         {{-- STAT CARDS --}}
+        @php
+            $canOpenFormOrders = ($isAdmin || $isSuperAdmin) && \Illuminate\Support\Facades\Route::has('form-orders.index');
+            $cardClass = 'bg-white rounded-xl border border-slate-200 p-4 transition';
+            $clickableClass = $cardClass . ' hover:border-slate-300 hover:shadow-md cursor-pointer';
+        @endphp
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white rounded-xl border border-slate-200 p-4">
-                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Total Invoice</div>
-                <div class="text-2xl font-bold text-navy-600 mt-1">{{ $stats['total_invoice'] }}</div>
-            </div>
-            <div class="bg-white rounded-xl border border-slate-200 p-4">
-                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Lunas</div>
-                <div class="text-2xl font-bold text-emerald-600 mt-1">{{ $stats['lunas'] }}</div>
-            </div>
-            <div class="bg-white rounded-xl border border-slate-200 p-4">
-                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Menunggu</div>
-                <div class="text-2xl font-bold text-amber-500 mt-1">{{ $stats['menunggu'] }}</div>
-            </div>
-            <div class="bg-white rounded-xl border border-slate-200 p-4">
-                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Total Pendapatan</div>
-                <div class="text-lg font-bold text-navy-600 mt-1">
-                    Rp {{ number_format($stats['pendapatan'], 0, ',', '.') }}
+            <{{ $canOpenFormOrders ? 'a' : 'div' }}
+                @if ($canOpenFormOrders) href="{{ route('form-orders.index') }}" @endif
+                class="{{ $canOpenFormOrders ? $clickableClass : $cardClass }} block">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Total Proyek</div>
+                <div class="text-2xl font-bold text-navy-600 mt-1">{{ $stats['total_proyek'] }}</div>
+                <div class="text-xs text-emerald-600 mt-1">↑ {{ $stats['sedang_berjalan'] }} aktif berjalan</div>
+            </{{ $canOpenFormOrders ? 'a' : 'div' }}>
+
+            <{{ $canOpenFormOrders ? 'a' : 'div' }}
+                @if ($canOpenFormOrders) href="{{ route('form-orders.index', ['status' => 'draft']) }}" @endif
+                class="{{ $canOpenFormOrders ? $clickableClass : $cardClass }} block">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Sedang Berjalan</div>
+                <div class="text-2xl font-bold text-navy-600 mt-1">{{ $stats['sedang_berjalan'] }}</div>
+                <div class="text-xs text-slate-400 mt-1">
+                    {{ $stats['total_proyek'] ? round($stats['sedang_berjalan'] / $stats['total_proyek'] * 100) : 0 }}% dari total
                 </div>
+            </{{ $canOpenFormOrders ? 'a' : 'div' }}>
+
+            <{{ $canOpenFormOrders ? 'a' : 'div' }}
+                @if ($canOpenFormOrders) href="{{ route('form-orders.index', ['deadline_status' => 'mendekati']) }}" @endif
+                class="{{ $canOpenFormOrders ? $clickableClass : $cardClass }} block">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Mendekati Deadline</div>
+                <div class="text-2xl font-bold mt-1 {{ $stats['mendekati_deadline'] ? 'text-red-600' : 'text-navy-600' }}">{{ $stats['mendekati_deadline'] }}</div>
+                <div class="text-xs mt-1 {{ $stats['mendekati_deadline'] ? 'text-red-500' : 'text-slate-400' }}">
+                    {{ $stats['mendekati_deadline'] ? 'Perlu perhatian' : 'Semua aman' }}
+                </div>
+            </{{ $canOpenFormOrders ? 'a' : 'div' }}>
+
+            <div class="{{ $cardClass }}">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Tugas Selesai</div>
+                <div class="text-2xl font-bold text-navy-600 mt-1">{{ $stats['tugas_selesai'] }}</div>
+                <div class="text-xs text-slate-400 mt-1">dari {{ $stats['total_tugas'] }} total tugas</div>
             </div>
         </div>
 
@@ -50,83 +70,77 @@
             </div>
         @endif
 
-        {{-- CHARTS --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div class="bg-white rounded-xl border border-slate-200">
-                <div class="px-5 py-3 border-b border-slate-100 text-sm font-semibold text-navy-600">
-                    Pendapatan per Brand
-                </div>
-                <div class="p-5">
-                    @if($brandCount)
-                        <div class="flex items-end justify-around gap-2 h-40 border-l-2 border-b-2 border-slate-100 px-2">
-                            @foreach(range(1, min($brandCount, 6)) as $i)
-                                <div class="flex flex-col items-center gap-1 flex-1">
-                                    <div class="w-full max-w-8 bg-navy-600 rounded-t" style="height:{{ rand(20, 130) }}px"></div>
-                                    <span class="text-[9px] text-slate-400">B{{ $i }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="text-sm text-slate-400 text-center py-14">Belum ada data</p>
-                    @endif
-                </div>
+        {{-- STATUS TIM --}}
+        <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-navy-600">Status Tim</h3>
+                <span class="text-xs text-slate-400">{{ $draftersStatus->flatten(1)->count() }} drafter</span>
             </div>
 
-            <div class="bg-white rounded-xl border border-slate-200">
-                <div class="px-5 py-3 border-b border-slate-100 text-sm font-semibold text-navy-600">
-                    Pendapatan Bulanan
-                </div>
-                <div class="p-5">
-                    <div class="flex items-end justify-around gap-1 h-40 border-l-2 border-b-2 border-slate-100 px-2">
-                        @foreach(['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'] as $i => $m)
-                            <div class="flex flex-col items-center gap-1 flex-1">
-                                <div class="w-full max-w-5 bg-gold-400 rounded-t" style="height:{{ max(2, $monthlyRevenue[$i]) }}px"></div>
-                                <span class="text-[8px] text-slate-400">{{ $m }}</span>
+            @if ($draftersStatus->isEmpty())
+                <p class="text-sm text-slate-400 text-center py-8">Belum ada drafter terdaftar.</p>
+            @else
+                <div class="space-y-5">
+                    @foreach ($draftersStatus as $jobdesk => $drafters)
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">{{ $jobdesk }}</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                @foreach ($drafters as $drafter)
+                                    @php
+                                        $byFormOrder = $drafter->assignedTasks->groupBy('form_order_id');
+                                        $hasPending = $byFormOrder->isNotEmpty();
+                                        $isFocusValid = $drafter->active_form_order_id && $byFormOrder->has($drafter->active_form_order_id);
+                                        $badgeClass = $isFocusValid ? 'bg-indigo-100 text-indigo-700' : ($hasPending ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500');
+                                        $badgeLabel = $isFocusValid ? 'Fokus' : ($hasPending ? 'Menunggu' : 'Idle');
+                                        $initials = collect(explode(' ', $drafter->name))->map(fn ($w) => strtoupper($w[0] ?? ''))->take(2)->join('');
+                                    @endphp
+                                    <div class="border border-slate-200 rounded-lg p-3">
+                                        <div class="flex items-center gap-2 mb-3">
+                                            <div class="w-9 h-9 rounded-full bg-navy-50 text-navy-600 font-bold text-xs flex items-center justify-center shrink-0">
+                                                {{ $initials }}
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-sm font-semibold text-slate-800 truncate">{{ $drafter->name }}</div>
+                                            </div>
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 {{ $badgeClass }}">
+                                                {{ $badgeLabel }}
+                                            </span>
+                                        </div>
+
+                                        @if ($hasPending)
+                                            <div class="space-y-2">
+                                                @foreach ($byFormOrder as $formOrderId => $tasks)
+                                                    @php $fo = $tasks->first()->formOrder; $isFocus = $isFocusValid && $formOrderId == $drafter->active_form_order_id; @endphp
+                                                    <div class="rounded-md p-2 {{ $isFocus ? 'bg-indigo-50 border border-indigo-200' : 'bg-slate-50' }}">
+                                                        <div class="flex items-center justify-between gap-2">
+                                                            <div class="text-xs font-semibold text-slate-700 truncate">{{ $fo->nama_klien }}</div>
+                                                            @if ($isFocus)
+                                                                <span class="text-[9px] font-bold text-indigo-600 uppercase shrink-0">Fokus</span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="text-[10px] text-slate-400 mb-1">{{ $fo->brand->name ?? '-' }} &middot; {{ $fo->nomor }}</div>
+                                                        <ul class="space-y-0.5">
+                                                            @foreach ($tasks as $task)
+                                                                <li class="text-[11px] text-slate-600 flex items-center gap-1.5">
+                                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+                                                                    <span class="truncate">{{ $task->name }}</span>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <p class="text-xs text-slate-400">Tidak ada tugas aktif.</p>
+                                        @endif
+                                    </div>
+                                @endforeach
                             </div>
-                        @endforeach
-                    </div>
+                        </div>
+                    @endforeach
                 </div>
-            </div>
+            @endif
         </div>
 
-        {{-- RECENT INVOICES --}}
-        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div class="px-5 py-3 border-b border-slate-100 text-sm font-semibold text-navy-600">
-                Invoice Terbaru
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
-                            <th class="text-left px-5 py-2.5">No.</th>
-                            <th class="text-left px-5 py-2.5">Brand</th>
-                            <th class="text-left px-5 py-2.5">Klien</th>
-                            <th class="text-left px-5 py-2.5">Total</th>
-                            <th class="text-left px-5 py-2.5">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($recentInvoices as $inv)
-                            <tr>
-                                <td class="px-5 py-2.5 font-semibold text-navy-600">{{ $inv->nomor }}</td>
-                                <td class="px-5 py-2.5">{{ $inv->brand->name ?? '-' }}</td>
-                                <td class="px-5 py-2.5">{{ $inv->klien }}</td>
-                                <td class="px-5 py-2.5 font-medium">Rp {{ number_format($inv->total, 0, ',', '.') }}</td>
-                                <td class="px-5 py-2.5">
-                                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full
-                                        {{ $inv->status === 'lunas' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
-                                        {{ ucfirst($inv->status) }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-10 text-slate-400">Belum ada invoice</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
 </x-app-layout>

@@ -78,8 +78,8 @@
                 @if ($formOrder->images->isNotEmpty())
                     <div style="font-size:13px;font-weight:700;color:#1a365d;margin-bottom:8px">Lampiran Gambar</div>
                     @foreach ($formOrder->images as $img)
-                        <div style="margin-bottom:14px">
-                            <img src="{{ $src($img->path) }}" style="max-width:300px;max-height:220px;object-fit:contain;border:1px solid #e2e8f0;border-radius:6px;display:block">
+                        <div style="margin-bottom:16px">
+                            <img src="{{ $src($img->path) }}" style="max-width:{{ $img->pdf_max_width }}px;max-height:520px;object-fit:contain;border:1px solid #e2e8f0;border-radius:6px;display:block">
                             @if ($img->caption)
                                 <div style="font-size:11px;color:#4a5568;margin-top:4px">{{ $img->caption }}</div>
                             @endif

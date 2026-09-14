@@ -23,6 +23,7 @@ class UpdateFormOrderAction
             $formOrder->update([
                 'invoice_id' => $data['invoice_id'] ?? null,
                 'tanggal_order' => $data['tanggal_order'],
+                'deadline' => $data['deadline'] ?? null,
                 'nama_klien' => $data['nama_klien'],
                 'lokasi_project' => $data['lokasi_project'] ?? null,
                 'jenis_pekerjaan' => $data['jenis_pekerjaan'] ?? null,
@@ -67,6 +68,7 @@ class UpdateFormOrderAction
         foreach ($existingImages as $id => $data) {
             $formOrder->images()->where('id', $id)->update([
                 'caption' => $data['caption'] ?? null,
+                'size' => $data['size'] ?? 'sedang',
             ]);
         }
     }
@@ -85,6 +87,7 @@ class UpdateFormOrderAction
             $formOrder->images()->create([
                 'path' => $path,
                 'caption' => $image['caption'] ?? null,
+                'size' => $image['size'] ?? 'sedang',
                 'urutan' => $nextUrutan++,
             ]);
         }

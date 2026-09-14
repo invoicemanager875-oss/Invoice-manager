@@ -20,6 +20,7 @@ class FormOrder extends Model
         'tahun',
         'bulan',
         'tanggal_order',
+        'deadline',
         'nama_klien',
         'lokasi_project',
         'jenis_pekerjaan',
@@ -29,13 +30,16 @@ class FormOrder extends Model
         'lingkup_pekerjaan',
         'catatan_klien',
         'status',
+        'dikirim_at',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal_order' => 'date',
+            'deadline' => 'date',
             'lingkup_pekerjaan' => 'array',
+            'dikirim_at' => 'datetime',
         ];
     }
 
@@ -95,5 +99,46 @@ class FormOrder extends Model
         }
 
         return (int) round($this->tasks->where('is_done', true)->count() / $total * 100);
+    }
+
+    /**
+     * Sisa hari sampai deadline (negatif kalau sudah lewat). Null kalau
+     * belum diisi deadline-nya.
+     */
+    public function getDaysUntilDeadlineAttribute(): ?int
+    {
+        if (! $this->deadline) {
+            return null;
+        }
+
+        return (int) now()->startOfDay()->diffInDays($this->deadline->copy()->startOfDay(), false);
+    }
+
+    /**
+     * Klasifikasi status proyek terhadap deadline, meniru getStatus() di
+     * referensi basyid_pm1: status manual "selesai" selalu menang, baru
+     * setelah itu dibedakan berdasar sisa hari ke deadline.
+     */
+    public function getDeadlineStatusAttribute(): string
+    {
+        if ($this->status === 'selesai') {
+            return 'selesai';
+        }
+
+        $days = $this->days_until_deadline;
+
+        if ($days === null) {
+            return 'berlangsung';
+        }
+
+        if ($days < 0) {
+            return 'terlambat';
+        }
+
+        if ($days <= 30) {
+            return 'mendekati';
+        }
+
+        return 'berlangsung';
     }
 }

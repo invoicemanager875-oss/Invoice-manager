@@ -46,6 +46,22 @@
                     <dd class="mt-0.5 text-slate-700">{{ $formOrder->tanggal_order->format('d M Y') }}</dd>
                 </div>
                 <div>
+                    <dt class="text-slate-400 text-xs uppercase tracking-wide">Deadline</dt>
+                    <dd class="mt-0.5">
+                        @if (! $formOrder->deadline)
+                            <span class="text-slate-400">-</span>
+                        @elseif ($formOrder->deadline_status === 'selesai')
+                            <span class="text-slate-700">{{ $formOrder->deadline->format('d M Y') }}</span>
+                        @elseif ($formOrder->deadline_status === 'terlambat')
+                            <span class="text-sm font-semibold text-red-600">Terlambat {{ abs($formOrder->days_until_deadline) }} hari ({{ $formOrder->deadline->format('d M Y') }})</span>
+                        @elseif ($formOrder->deadline_status === 'mendekati')
+                            <span class="text-sm font-semibold text-amber-600">Sisa {{ $formOrder->days_until_deadline }} hari ({{ $formOrder->deadline->format('d M Y') }})</span>
+                        @else
+                            <span class="text-slate-700">{{ $formOrder->deadline->format('d M Y') }}</span>
+                        @endif
+                    </dd>
+                </div>
+                <div>
                     <dt class="text-slate-400 text-xs uppercase tracking-wide">Lokasi Project</dt>
                     <dd class="mt-0.5 text-slate-700">{{ $formOrder->lokasi_project ?: '-' }}</dd>
                 </div>
@@ -156,10 +172,17 @@
             @if ($formOrder->images->isNotEmpty())
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     @foreach ($formOrder->images as $img)
-                        <div class="border border-slate-200 rounded-lg overflow-hidden">
-                            <img src="{{ \Illuminate\Support\Facades\Storage::url($img->path) }}" class="w-full h-40 object-cover">
+                        @php
+                            [$colSpan, $height] = match ($img->size ?? 'sedang') {
+                                'kecil' => ['sm:col-span-1', 'h-32'],
+                                'besar' => ['sm:col-span-3', 'h-96'],
+                                default => ['sm:col-span-1', 'h-56'],
+                            };
+                        @endphp
+                        <div class="border border-slate-200 rounded-lg overflow-hidden {{ $colSpan }}">
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($img->path) }}" class="w-full {{ $height }} object-contain bg-slate-50">
                             @if ($img->caption)
-                                <div class="p-2 text-xs text-slate-600 bg-slate-50">{{ $img->caption }}</div>
+                                <div class="p-2 text-xs text-slate-600 bg-slate-50 border-t border-slate-100">{{ $img->caption }}</div>
                             @endif
                         </div>
                     @endforeach

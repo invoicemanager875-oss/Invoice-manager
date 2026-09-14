@@ -50,13 +50,11 @@
             @include('invoices._partials.totals')
         </div>
 
-        {{-- Tabel (bukan CSS grid) supaya rekening & tanda tangan tetap tampil 2 kolom saat dirender ke PDF oleh dompdf, yang tidak mendukung CSS grid. --}}
-        <table style="width:100%;border-collapse:collapse;margin-top:24px">
-            <tr>
-                <td style="width:50%;vertical-align:top;padding-right:12px">@include('invoices._partials.rekening', ['forPdf' => true])</td>
-                <td style="width:50%;vertical-align:top;padding-left:12px">@include('invoices._partials.sign', ['forPdf' => true])</td>
-            </tr>
-        </table>
+        {{-- Kwitansi menandakan pembayaran sudah lunas, jadi tidak perlu lagi
+             menampilkan rekening/QRIS pembayaran — cukup tanda tangan saja. --}}
+        <div style="margin-top:24px">
+            @include('invoices._partials.sign', ['forPdf' => true, 'hideQris' => true])
+        </div>
     </div>
 
 </body>

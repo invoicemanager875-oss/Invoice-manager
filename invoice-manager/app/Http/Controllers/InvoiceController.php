@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
 
 class InvoiceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Invoice::class);
 
@@ -29,10 +29,27 @@ class InvoiceController extends Controller
                 ! $user->hasRole('superadmin'),
                 fn ($query) => $query->whereIn('brand_id', $user->ownedBrands()->pluck('id'))
             )
+            ->when(
+                $user->hasRole('admin') && $request->filled('brand_id'),
+                fn ($query) => $query->where('brand_id', $request->input('brand_id'))
+            )
+            ->when(
+                $request->filled('status'),
+                fn ($query) => $query->where('status', $request->input('status'))
+            )
+            ->when(
+                $request->input('jatuh_tempo') === 'terlambat',
+                fn ($query) => $query->where('status', '!=', 'lunas')
+                    ->whereNotNull('jatuh_tempo')
+                    ->whereDate('jatuh_tempo', '<', now())
+            )
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('invoices.index', compact('invoices'));
+        $brands = $this->brandsForUser();
+
+        return view('invoices.index', compact('invoices', 'brands'));
     }
 
     public function create()
@@ -167,7 +184,7 @@ class InvoiceController extends Controller
             'email' => $data['email'] ?? null,
             'tanggal' => $data['tanggal'],
             'jatuh_tempo' => $data['jatuh_tempo'] ?? null,
-            'desain_tema' => $data['desain_tema'] ?? 'classic',
+            'desain_tema' => $existingInvoice->desain_tema ?? $brand->default_desain_tema ?? 'classic',
             'diskon_persen' => $data['diskon_persen'] ?? 0,
             'ppn_persen' => $data['ppn_persen'] ?? 0,
             'catatan' => $data['catatan'] ?? null,

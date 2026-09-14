@@ -10,11 +10,14 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Brand;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Invoice;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasRoles;
+
+    public const JOBDESKS = ['3D', '2D', 'Estimator', 'Engineering'];
 
     public function brands(): BelongsToMany
     {
@@ -32,6 +35,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(Invoice::class, 'created_by');
     }
+
+    public function assignedTasks(): HasMany
+    {
+        return $this->hasMany(FormOrderTask::class, 'assigned_to');
+    }
+
+    public function activeFormOrder(): BelongsTo
+    {
+        return $this->belongsTo(FormOrder::class, 'active_form_order_id');
+    }
     /** @use HasFactory<UserFactory> */
 
     /**
@@ -43,6 +56,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'jobdesk',
     ];
 
     /**

@@ -20,6 +20,7 @@ class UpdateDrafterRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email')->ignore($this->route('drafter'))],
             'password' => ['nullable', 'confirmed', Password::defaults()],
+            'jobdesk' => ['nullable', Rule::in(User::JOBDESKS)],
             'brand_ids' => ['nullable', 'array'],
             'brand_ids.*' => ['exists:brands,id'],
         ];

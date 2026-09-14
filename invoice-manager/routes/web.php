@@ -55,14 +55,24 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
+    if (config('features.drafter_tasks')) {
+        Route::get('reports/kpi/pdf', [ReportController::class, 'kpiPdf'])->name('reports.kpi.pdf');
+    }
+
+    Route::get('form-orders/finished', [FormOrderController::class, 'finished'])->name('form-orders.finished');
+
     Route::resource('form-orders', FormOrderController::class);
 
     Route::get('form-orders/{form_order}/pdf', [FormOrderController::class, 'pdf'])->name('form-orders.pdf');
     Route::post('form-orders/{form_order}/finalize', [FormOrderController::class, 'finalize'])->name('form-orders.finalize');
+    Route::patch('form-orders/{form_order}/mark-delivered', [FormOrderController::class, 'markDelivered'])->name('form-orders.markDelivered');
 
     if (config('features.drafter_tasks')) {
         Route::get('my-tasks', [TaskController::class, 'index'])->name('tasks.index');
         Route::patch('my-tasks/{task}', [TaskController::class, 'toggle'])->name('tasks.toggle');
+        Route::patch('my-tasks/{task}/claim', [TaskController::class, 'claim'])->name('tasks.claim');
+        Route::patch('my-tasks/projects/{form_order}/toggle-active', [TaskController::class, 'toggleActiveProject'])
+            ->name('tasks.toggleActiveProject');
 
         Route::patch('form-orders/{form_order}/tasks/{task}/assign', [FormOrderController::class, 'assignTask'])
             ->name('form-orders.tasks.assign');

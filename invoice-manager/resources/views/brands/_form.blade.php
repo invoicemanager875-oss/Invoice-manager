@@ -187,6 +187,20 @@
                     value="{{ old('canva_link', $brand->canva_link ?? '') }}" />
                 <x-input-error :messages="$errors->get('canva_link')" class="mt-1" />
             </div>
+
+            <div class="sm:col-span-3">
+                <x-input-label for="default_desain_tema" value="Model Desain Standar Invoice" />
+                <p class="mt-1 mb-2 text-xs text-slate-400">Otomatis terpilih setiap membuat invoice baru untuk brand ini, supaya tidak perlu pilih ulang tiap kali.</p>
+                <select id="default_desain_tema" name="default_desain_tema"
+                    class="mt-1 block w-full sm:w-1/2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                    <option value="brand" @selected(old('default_desain_tema', $brand->default_desain_tema ?? '') === 'brand')>Sesuai Warna Brand (Header/Aksen di atas)</option>
+                    @foreach (config('invoice_themes') as $key => $theme)
+                        <option value="{{ $key }}" @selected(old('default_desain_tema', $brand->default_desain_tema ?? 'classic') === $key)>{{ $theme['label'] }}</option>
+                    @endforeach
+                    <option value="kop-gambar" @selected(old('default_desain_tema', $brand->default_desain_tema ?? '') === 'kop-gambar')>Upload Gambar Kop Surat</option>
+                </select>
+                <x-input-error :messages="$errors->get('default_desain_tema')" class="mt-1" />
+            </div>
         </div>
     </div>
 

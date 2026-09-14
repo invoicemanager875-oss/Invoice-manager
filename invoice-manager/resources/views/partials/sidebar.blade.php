@@ -6,12 +6,15 @@
         ['invoices.index',   'Daftar Invoice',     'document-list',  ['invoices.index', 'invoices.show', 'invoices.destroy']],
         ['receipts.index',   'Kwitansi',           'receipt',        ['receipts.*']],
         ['followups.index',  'Follow Up',          'phone',          ['followups.*']],
-        ['form-orders.index','Form Order',         'clipboard',      ['form-orders.*']],
+        ['form-orders.index','Form Order',         'clipboard',      ['form-orders.index', 'form-orders.create', 'form-orders.store', 'form-orders.show', 'form-orders.edit', 'form-orders.update', 'form-orders.destroy', 'form-orders.pdf', 'form-orders.finalize', 'form-orders.tasks.assign']],
+        ['form-orders.finished', 'Project Selesai', 'archive-box',   ['form-orders.finished', 'form-orders.markDelivered']],
         ['schedules.index',  'Jadwal Perencanaan', 'calendar',       ['schedules.*']],
         ['contracts.index',  'Surat Kontrak',      'contract',       ['contracts.*']],
     ];
 
-    $utama[] = ['tasks.index', 'Tugas Saya', 'check-circle', ['tasks.*']];
+    if (auth()->user()->hasRole('drafter')) {
+        $utama[] = ['tasks.index', 'Task Drafter', 'check-circle', ['tasks.*']];
+    }
 
     $manajemen = [
         ['brands.index', 'Kelola Brand',    'building'],
@@ -20,13 +23,13 @@
     ];
 @endphp
 
-{{-- Sidebar: fixed off-canvas on mobile, static on lg+ --}}
+{{-- Sidebar: fixed off-canvas on mobile, fixed full-height on lg+ --}}
 <aside
     class="fixed inset-y-0 left-0 z-50 w-64 bg-navy-600 transform transition-transform duration-200 ease-in-out
-           lg:translate-x-0 lg:static lg:inset-auto lg:fixed lg:flex lg:flex-col"
+           lg:translate-x-0 lg:flex lg:flex-col"
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
 >
-    <div class="flex flex-col h-full overflow-y-auto">
+    <div class="flex flex-col h-full overflow-hidden">
 
         {{-- Brand / logo --}}
         <div class="h-16 flex items-center gap-2 px-5 border-b border-white/10 shrink-0">
@@ -44,7 +47,7 @@
             </button>
         </div>
 
-        <nav class="flex-1 px-3 py-4 space-y-6">
+        <nav class="flex-1 min-h-0 overflow-y-auto px-3 py-4 space-y-6">
 
             {{-- UTAMA --}}
             <div>

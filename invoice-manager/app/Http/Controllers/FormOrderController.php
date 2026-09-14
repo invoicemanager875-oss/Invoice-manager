@@ -36,6 +36,12 @@ class FormOrderController extends Controller
                 $request->filled('status'),
                 fn ($query) => $query->where('status', $request->input('status'))
             )
+            ->when(
+                $request->input('deadline_status') === 'mendekati',
+                fn ($query) => $query->where('status', '!=', 'selesai')
+                    ->whereNotNull('deadline')
+                    ->whereDate('deadline', '<=', now()->addDays(30))
+            )
             ->latest('tanggal_order')
             ->paginate(15)
             ->withQueryString();
@@ -168,6 +174,58 @@ class FormOrderController extends Controller
         return redirect()
             ->route('form-orders.show', $form_order)
             ->with('success', 'Form Order ditandai selesai.');
+    }
+
+    /**
+     * Daftar Form Order yang sudah selesai, dikelompokkan per brand, dengan
+     * status "sudah dikirim ke klien" — meniru tab "Daftar Project Selesai"
+     * di referensi basyid_pm1.
+     */
+    public function finished(Request $request)
+    {
+        $this->authorize('viewAny', FormOrder::class);
+
+        $user = auth()->user();
+
+        $formOrders = FormOrder::with('brand')
+            ->where('status', 'selesai')
+            ->when(
+                ! $user->hasRole('superadmin'),
+                fn ($query) => $query->whereIn('brand_id', $user->ownedBrands()->pluck('id'))
+            )
+            ->when(
+                $user->hasRole('admin') && $request->filled('brand_id'),
+                fn ($query) => $query->where('brand_id', $request->input('brand_id'))
+            )
+            ->when(
+                $request->input('dikirim') === 'sudah',
+                fn ($query) => $query->whereNotNull('dikirim_at')
+            )
+            ->when(
+                $request->input('dikirim') === 'belum',
+                fn ($query) => $query->whereNull('dikirim_at')
+            )
+            ->latest('tanggal_order')
+            ->get();
+
+        $groupedByBrand = $formOrders->groupBy(fn (FormOrder $fo) => $fo->brand->name ?? 'Tanpa Brand');
+
+        $brands = $this->brandsForUser();
+
+        return view('form-orders.finished', compact('groupedByBrand', 'brands'));
+    }
+
+    public function markDelivered(FormOrder $form_order)
+    {
+        $this->authorize('view', $form_order);
+
+        abort_unless($form_order->status === 'selesai', 404);
+
+        $form_order->update([
+            'dikirim_at' => $form_order->dikirim_at ? null : now(),
+        ]);
+
+        return back()->with('success', $form_order->dikirim_at ? 'Ditandai sudah dikirim ke klien.' : 'Ditandai belum dikirim.');
     }
 
     private function brandsForUser(): Collection

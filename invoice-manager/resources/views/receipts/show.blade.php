@@ -46,9 +46,10 @@
                 @include('invoices._partials.totals')
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>@include('invoices._partials.rekening')</div>
-                <div>@include('invoices._partials.sign')</div>
+            {{-- Kwitansi menandakan pembayaran sudah lunas, jadi tidak perlu lagi
+                 menampilkan rekening/QRIS pembayaran — cukup tanda tangan saja. --}}
+            <div>
+                @include('invoices._partials.sign', ['hideQris' => true])
             </div>
         </div>
     </div>

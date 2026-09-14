@@ -21,6 +21,8 @@ class UpdateFormOrderRequest extends FormRequest
 
             'tanggal_order' => ['required', 'date'],
 
+            'deadline' => ['nullable', 'date'],
+
             'nama_klien' => ['required', 'string', 'max:255'],
 
             'lokasi_project' => ['nullable', 'string'],
@@ -49,9 +51,13 @@ class UpdateFormOrderRequest extends FormRequest
 
             'images.*.caption' => ['nullable', 'string', 'max:255'],
 
+            'images.*.size' => ['nullable', 'string', 'in:kecil,sedang,besar'],
+
             'existing_images' => ['nullable', 'array'],
 
             'existing_images.*.caption' => ['nullable', 'string', 'max:255'],
+
+            'existing_images.*.size' => ['nullable', 'string', 'in:kecil,sedang,besar'],
 
             'remove_image_ids' => ['nullable', 'array'],
 

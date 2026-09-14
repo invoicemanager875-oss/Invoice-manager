@@ -66,6 +66,7 @@
         ppn: {{ (float) old('ppn_persen', $invoice->ppn_persen ?? 0) }},
         klien: @js(old('klien', $invoice->klien ?? '')),
         brandName: @js($invoice->brand->name ?? ''),
+        brandThemes: @js($brands->pluck('default_desain_tema', 'id')),
         sphAktif: {{ old('sph_aktif', ($sph['aktif'] ?? false) ? '1' : '0') === '1' ? 'true' : 'false' }},
         desainTema: @js(old('desain_tema', $invoice->desain_tema ?? 'classic')),
         terminShowPct: {{ old('termin_show_pct', ($invoice->termin_show_pct ?? true) ? '1' : '0') === '1' ? 'true' : 'false' }},
@@ -236,7 +237,7 @@
                 <input type="hidden" name="brand_id" value="{{ $invoice->brand_id }}">
             @else
                 <select name="brand_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                    required @change="brandName = $event.target.selectedOptions[0]?.text || ''">
+                    required @change="brandName = $event.target.selectedOptions[0]?.text || ''; desainTema = brandThemes[$event.target.value] || 'classic'">
                     <option value="">Pilih brand</option>
                     @foreach ($brands as $brand)
                         <option value="{{ $brand->id }}" @selected(old('brand_id') == $brand->id)>{{ $brand->name }}</option>
@@ -282,15 +283,15 @@
         </div>
 
         <div>
-            <x-input-label for="desain_tema" value="Model Desain" />
-            <select id="desain_tema" name="desain_tema" x-model="desainTema"
-                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                @foreach (config('invoice_themes') as $key => $theme)
-                    <option value="{{ $key }}">{{ $theme['label'] }}</option>
-                @endforeach
-                <option value="kop-gambar">Upload Gambar Kop Surat</option>
-            </select>
-            <x-input-error :messages="$errors->get('desain_tema')" class="mt-1" />
+            <x-input-label value="Model Desain" />
+            <p class="mt-1 text-sm text-slate-500">
+                @if ($invoice)
+                    {{ $invoice->desain_tema_label }}
+                @else
+                    Otomatis mengikuti standar desain brand yang dipilih
+                @endif
+                <span class="text-xs text-slate-400 block">Atur standarnya di Kelola Brand &rarr; Tampilan.</span>
+            </p>
         </div>
 
         <div x-show="desainTema === 'kop-gambar'" x-cloak>

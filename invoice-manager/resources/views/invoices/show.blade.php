@@ -50,7 +50,7 @@
             @include('invoices._partials.kop')
 
             <div class="p-6 flex items-center justify-between flex-wrap gap-3">
-                <span class="text-xs text-slate-400">Model desain: {{ config('invoice_themes.'.$invoice->desain_tema.'.label', 'Custom') }}</span>
+                <span class="text-xs text-slate-400">Model desain: {{ $invoice->desain_tema_label }}</span>
                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full
                     {{ $invoice->status === 'lunas' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
                     {{ ucfirst($invoice->status) }}

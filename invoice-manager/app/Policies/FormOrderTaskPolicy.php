@@ -15,4 +15,21 @@ class FormOrderTaskPolicy
 
         return $user->can('view', $formOrderTask->formOrder);
     }
+
+    public function claim(User $user, FormOrderTask $formOrderTask): bool
+    {
+        if ($formOrderTask->assigned_to !== null) {
+            return false;
+        }
+
+        if (! $user->hasRole('drafter')) {
+            return false;
+        }
+
+        if ($formOrderTask->formOrder->is_locked) {
+            return false;
+        }
+
+        return $user->brands()->whereKey($formOrderTask->formOrder->brand_id)->exists();
+    }
 }

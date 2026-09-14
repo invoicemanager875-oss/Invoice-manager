@@ -21,6 +21,7 @@
                     <tr class="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
                         <th class="text-left px-5 py-2.5">Nama</th>
                         <th class="text-left px-5 py-2.5">Email</th>
+                        <th class="text-left px-5 py-2.5">Jobdesk</th>
                         <th class="text-left px-5 py-2.5">Brand</th>
                         <th class="text-right px-5 py-2.5">Aksi</th>
                     </tr>
@@ -30,6 +31,13 @@
                         <tr>
                             <td class="px-5 py-3 font-semibold text-navy-600">{{ $drafter->name }}</td>
                             <td class="px-5 py-3">{{ $drafter->email }}</td>
+                            <td class="px-5 py-3">
+                                @if ($drafter->jobdesk)
+                                    <span class="inline-flex text-xs font-semibold px-2 py-0.5 rounded-full bg-navy-50 text-navy-600">{{ $drafter->jobdesk }}</span>
+                                @else
+                                    <span class="text-xs text-slate-400">-</span>
+                                @endif
+                            </td>
                             <td class="px-5 py-3">
                                 @forelse ($drafter->brands as $brand)
                                     <span class="inline-flex text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 mr-1">{{ $brand->name }}</span>
@@ -56,7 +64,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center py-10 text-slate-400">Belum ada drafter.</td>
+                            <td colspan="5" class="text-center py-10 text-slate-400">Belum ada drafter.</td>
                         </tr>
                     @endforelse
                 </tbody>

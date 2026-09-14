@@ -5,7 +5,7 @@
         Pekerjaan meluber ke halaman berikutnya.
     --}}
     <div class="{{ $forPdf ? 'pdf-kop' : '' }}">
-    <table style="width:100%;border-collapse:collapse;background-color:#1a365d">
+    <table style="width:100%;border-collapse:collapse;background-color:{{ $brand->color_header ?? '#1a365d' }}">
         <tr>
             <td style="padding:18px 24px;vertical-align:middle">
                 <table style="border-collapse:collapse">
@@ -24,7 +24,7 @@
                 </table>
             </td>
             <td style="padding:18px 24px;vertical-align:middle;text-align:right">
-                <div style="font-size:22px;font-weight:800;color:#c9a227;letter-spacing:2px">FORM ORDER</div>
+                <div style="font-size:22px;font-weight:800;color:{{ $brand->color_accent ?? '#c9a227' }};letter-spacing:2px">FORM ORDER</div>
                 <div style="font-size:11px;color:rgba(255,255,255,.8)">{{ $formOrder->nomor }}</div>
                 <div style="font-size:11px;color:rgba(255,255,255,.7)">{{ $formOrder->tanggal_order->format('d M Y') }}</div>
             </td>

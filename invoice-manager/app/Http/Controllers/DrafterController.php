@@ -36,6 +36,7 @@ class DrafterController extends Controller
             'name' => $request->validated('name'),
             'email' => $request->validated('email'),
             'password' => Hash::make($request->validated('password')),
+            'jobdesk' => $request->validated('jobdesk'),
         ]);
 
         $drafter->assignRole('drafter');
@@ -63,6 +64,7 @@ class DrafterController extends Controller
         $data = [
             'name' => $request->validated('name'),
             'email' => $request->validated('email'),
+            'jobdesk' => $request->validated('jobdesk'),
         ];
 
         if ($request->filled('password')) {

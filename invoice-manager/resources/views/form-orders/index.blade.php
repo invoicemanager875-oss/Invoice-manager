@@ -53,6 +53,7 @@
                         <th class="text-left px-5 py-2.5">Brand</th>
                         <th class="text-left px-5 py-2.5">Klien</th>
                         <th class="text-left px-5 py-2.5">Tanggal</th>
+                        <th class="text-left px-5 py-2.5">Deadline</th>
                         @if (config('features.drafter_tasks'))
                             <th class="text-left px-5 py-2.5">Progress</th>
                         @endif
@@ -71,6 +72,19 @@
                             <td class="px-5 py-3">{{ $fo->brand->name ?? '-' }}</td>
                             <td class="px-5 py-3">{{ $fo->nama_klien }}</td>
                             <td class="px-5 py-3">{{ $fo->tanggal_order->format('d M Y') }}</td>
+                            <td class="px-5 py-3">
+                                @if (! $fo->deadline)
+                                    <span class="text-slate-300">-</span>
+                                @elseif ($fo->deadline_status === 'selesai')
+                                    <span class="text-slate-400">{{ $fo->deadline->format('d M Y') }}</span>
+                                @elseif ($fo->deadline_status === 'terlambat')
+                                    <span class="text-xs font-semibold text-red-600">Terlambat {{ abs($fo->days_until_deadline) }} hari</span>
+                                @elseif ($fo->deadline_status === 'mendekati')
+                                    <span class="text-xs font-semibold text-amber-600">Sisa {{ $fo->days_until_deadline }} hari</span>
+                                @else
+                                    <span class="text-slate-500">{{ $fo->deadline->format('d M Y') }}</span>
+                                @endif
+                            </td>
                             @if (config('features.drafter_tasks'))
                                 <td class="px-5 py-3">
                                     @if ($fo->tasks->isNotEmpty())
@@ -116,7 +130,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ config('features.drafter_tasks') ? 7 : 6 }}" class="text-center py-10 text-slate-400">Belum ada form order.</td>
+                            <td colspan="{{ config('features.drafter_tasks') ? 8 : 7 }}" class="text-center py-10 text-slate-400">Belum ada form order.</td>
                         </tr>
                     @endforelse
                 </tbody>

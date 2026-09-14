@@ -14,6 +14,44 @@
         </div>
     </x-slot>
 
+    <form method="GET" class="bg-white rounded-xl border border-slate-200 p-4 mb-4 flex flex-wrap items-end gap-3">
+        @if (auth()->user()->hasRole('admin'))
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Brand</label>
+                <select name="brand_id" class="text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                    <option value="">Semua Brand</option>
+                    @foreach ($brands as $brand)
+                        <option value="{{ $brand->id }}" @selected(request('brand_id') == $brand->id)>{{ $brand->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Status</label>
+            <select name="status" class="text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                <option value="">Semua Status</option>
+                <option value="menunggu" @selected(request('status') === 'menunggu')>Menunggu</option>
+                <option value="lunas" @selected(request('status') === 'lunas')>Lunas</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Jatuh Tempo</label>
+            <select name="jatuh_tempo" class="text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                <option value="">Semua</option>
+                <option value="terlambat" @selected(request('jatuh_tempo') === 'terlambat')>Siap Follow Up (Terlambat)</option>
+            </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button type="submit" class="bg-navy-600 hover:bg-navy-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
+                Filter
+            </button>
+            <a href="{{ route('invoices.index') }}" class="text-sm text-slate-500 hover:text-slate-700">Reset</a>
+        </div>
+    </form>
+
     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -23,6 +61,7 @@
                         <th class="text-left px-5 py-2.5">Brand</th>
                         <th class="text-left px-5 py-2.5">Klien</th>
                         <th class="text-left px-5 py-2.5">Tanggal</th>
+                        <th class="text-left px-5 py-2.5">Jatuh Tempo</th>
                         <th class="text-left px-5 py-2.5">Total</th>
                         <th class="text-left px-5 py-2.5">Status</th>
                         <th class="text-right px-5 py-2.5">Aksi</th>
@@ -39,6 +78,15 @@
                             <td class="px-5 py-3">{{ $invoice->brand->name ?? '-' }}</td>
                             <td class="px-5 py-3">{{ $invoice->klien }}</td>
                             <td class="px-5 py-3">{{ $invoice->tanggal->format('d M Y') }}</td>
+                            <td class="px-5 py-3">
+                                @if (! $invoice->jatuh_tempo)
+                                    <span class="text-slate-300">-</span>
+                                @elseif ($invoice->is_overdue)
+                                    <span class="text-xs font-semibold text-red-600">Terlambat {{ abs($invoice->days_until_jatuh_tempo) }} hari</span>
+                                @else
+                                    <span class="text-slate-500">{{ $invoice->jatuh_tempo->format('d M Y') }}</span>
+                                @endif
+                            </td>
                             <td class="px-5 py-3 font-medium">Rp {{ number_format($invoice->total, 0, ',', '.') }}</td>
                             <td class="px-5 py-3">
                                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full
@@ -85,7 +133,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-10 text-slate-400">Belum ada invoice.</td>
+                            <td colspan="8" class="text-center py-10 text-slate-400">Belum ada invoice.</td>
                         </tr>
                     @endforelse
                 </tbody>

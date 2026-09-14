@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateBrandRequest extends FormRequest
 {
@@ -43,6 +44,7 @@ class UpdateBrandRequest extends FormRequest
             'ttd_jabatan' => ['nullable', 'string', 'max:100'],
             'color_header' => ['nullable', 'string'],
             'color_accent' => ['nullable', 'string'],
+            'default_desain_tema' => ['nullable', Rule::in([...array_keys(config('invoice_themes')), 'kop-gambar', 'brand'])],
             'canva_link' => ['nullable', 'url'],
             'rekening' => ['nullable', 'array'],
             'rekening.*.bank' => ['nullable', 'string', 'max:100'],

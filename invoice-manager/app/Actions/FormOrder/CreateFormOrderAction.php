@@ -35,6 +35,7 @@ class CreateFormOrderAction
                 'tahun' => $number['tahun'],
                 'bulan' => $number['bulan'],
                 'tanggal_order' => $data['tanggal_order'],
+                'deadline' => $data['deadline'] ?? null,
                 'nama_klien' => $data['nama_klien'],
                 'lokasi_project' => $data['lokasi_project'] ?? null,
                 'jenis_pekerjaan' => $data['jenis_pekerjaan'] ?? null,
@@ -56,6 +57,7 @@ class CreateFormOrderAction
                 $formOrder->images()->create([
                     'path' => $path,
                     'caption' => $image['caption'] ?? null,
+                    'size' => $image['size'] ?? 'sedang',
                     'urutan' => $index + 1,
                 ]);
             }

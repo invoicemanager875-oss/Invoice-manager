@@ -9,7 +9,7 @@ return [
     |
     | Mengontrol fitur role "drafter" + checklist tugas pada Form Order
     | (Kelola Drafter, assignment PIC per lingkup pekerjaan, halaman
-    | "Tugas Saya"). Default false agar tidak muncul di production sampai
+    | "Task Drafter"). Default false agar tidak muncul di production sampai
     | siap diaktifkan lewat FEATURE_DRAFTER_TASKS=true di .env.
     |
     */

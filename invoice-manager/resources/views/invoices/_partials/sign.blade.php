@@ -2,6 +2,7 @@
     $sign = $invoice->sign_config ?? [];
     $hasSign = ! empty($sign['ttd_path']) || ! empty($sign['stempel_path']) || ! empty($sign['materai_path']);
     $forPdf = $forPdf ?? false;
+    $hideQris = $hideQris ?? false;
     $src = fn ($path) => str_starts_with($path, 'data:')
         ? $path
         : ($forPdf
@@ -9,7 +10,7 @@
             : \Illuminate\Support\Facades\Storage::url($path));
 @endphp
 
-@if ($invoice->qris_path)
+@if ($invoice->qris_path && ! $hideQris)
     <div style="text-align:center">
         <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Scan QRIS untuk pembayaran</div>
         <img src="{{ $src($invoice->qris_path) }}" alt="QRIS" style="margin:0 auto;height:160px;width:160px;object-fit:contain;border-radius:8px;border:1px solid #e2e8f0;background:#fff;padding:8px">

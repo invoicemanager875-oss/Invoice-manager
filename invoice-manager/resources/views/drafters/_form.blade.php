@@ -41,6 +41,18 @@
     </div>
 
     <div>
+        <x-input-label for="jobdesk" value="Jobdesk (opsional)" />
+        <select id="jobdesk" name="jobdesk"
+            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+            <option value="">- Belum ditentukan -</option>
+            @foreach (\App\Models\User::JOBDESKS as $jobdesk)
+                <option value="{{ $jobdesk }}" @selected(old('jobdesk', $drafter->jobdesk ?? '') === $jobdesk)>{{ $jobdesk }}</option>
+            @endforeach
+        </select>
+        <x-input-error :messages="$errors->get('jobdesk')" class="mt-1" />
+    </div>
+
+    <div>
         <x-input-label value="Brand yang Bisa Diakses" />
         <p class="mt-1 mb-2 text-xs text-slate-400">Drafter hanya bisa di-assign sebagai PIC pada Form Order milik brand yang dipilih di sini.</p>
         <div class="space-y-2 border border-slate-200 rounded-md p-3">

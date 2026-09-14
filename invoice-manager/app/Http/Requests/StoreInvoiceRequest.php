@@ -37,7 +37,7 @@ class StoreInvoiceRequest extends FormRequest
 
             'termin_show_pct' => ['nullable', 'boolean'],
 
-            'desain_tema' => ['nullable', 'string', 'in:classic,modern,genz,elegant,pastel,kop-gambar'],
+            'desain_tema' => ['nullable', 'string', 'in:classic,modern,genz,elegant,pastel,kop-gambar,brand'],
 
             'kop_image' => ['nullable', 'image', 'max:5120'],
 

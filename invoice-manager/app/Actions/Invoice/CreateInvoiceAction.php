@@ -40,7 +40,7 @@ class CreateInvoiceAction
                 'email' => $data['email'] ?? null,
                 'tanggal' => $data['tanggal'],
                 'jatuh_tempo' => $data['jatuh_tempo'] ?? null,
-                'desain_tema' => $data['desain_tema'] ?? 'classic',
+                'desain_tema' => $brand->default_desain_tema ?? 'classic',
                 'kop_config' => $this->buildKopConfig($brand, $data),
                 'sign_config' => $this->buildSignConfig($brand),
                 'rekening_config' => $brand->rekening_config ?? [],

@@ -110,9 +110,63 @@ class Invoice extends Model
         return ! is_null($this->printed_at);
     }
 
+    /**
+     * Sisa hari sampai jatuh tempo (negatif kalau sudah lewat). Null kalau
+     * belum diisi jatuh temponya.
+     */
+    public function getDaysUntilJatuhTempoAttribute(): ?int
+    {
+        if (! $this->jatuh_tempo) {
+            return null;
+        }
+
+        return (int) now()->startOfDay()->diffInDays($this->jatuh_tempo->copy()->startOfDay(), false);
+    }
+
+    /**
+     * Apakah invoice ini lewat jatuh tempo dan belum lunas — sinyal utama
+     * buat admin bahwa invoice ini perlu di-follow up ke klien.
+     */
+    public function getIsOverdueAttribute(): bool
+    {
+        return $this->status !== 'lunas'
+            && $this->days_until_jatuh_tempo !== null
+            && $this->days_until_jatuh_tempo < 0;
+    }
+
+    /**
+     * Warna kop surat invoice ini. "brand" adalah tema dinamis (bukan preset
+     * tetap di config) yang memakai color_header/color_accent milik brand,
+     * disnapshot ke kop_config saat invoice dibuat — bukan warna brand
+     * terkini, supaya invoice lama tidak berubah tampilan kalau warna brand
+     * diganti nanti.
+     */
     public function getThemeAttribute(): array
     {
+        if ($this->desain_tema === 'brand') {
+            $kop = $this->kop_config ?? [];
+
+            return [
+                'label' => 'Sesuai Warna Brand',
+                'hdr' => $kop['color_header'] ?? config('invoice_themes.classic.hdr'),
+                'acc' => $kop['color_accent'] ?? config('invoice_themes.classic.acc'),
+            ];
+        }
+
+        if ($this->desain_tema === 'kop-gambar') {
+            return [
+                'label' => 'Upload Gambar Kop Surat',
+                'hdr' => config('invoice_themes.classic.hdr'),
+                'acc' => config('invoice_themes.classic.acc'),
+            ];
+        }
+
         return config('invoice_themes.'.$this->desain_tema) ?? config('invoice_themes.classic');
+    }
+
+    public function getDesainTemaLabelAttribute(): string
+    {
+        return $this->theme['label'] ?? 'Custom';
     }
 
     public function getNomorKwitansiAttribute(): string
