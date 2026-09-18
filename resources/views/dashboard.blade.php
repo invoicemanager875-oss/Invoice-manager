@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between flex-wrap gap-3">
             <div>
-                <h2 class="text-xl font-bold text-navy-600">Dashboard</h2>
+                <h2 class="text-xl font-bold text-navy-600">Dashboard xx</h2>
                 <p class="text-sm text-slate-500 mt-0.5">
                     Selamat datang, {{ auth()->user()->name }}
                     @if(!$isAdmin) &middot; {{ $brandCount }} brand Anda kelola @endif
